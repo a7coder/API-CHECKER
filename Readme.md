@@ -23,7 +23,8 @@ The goal of this project is to create a Python script that scans a given website
 - Handles exceptions and errors gracefully.
 - Supports multi-threading or asynchronous requests to speed up the scanning process.
 - Provides an option to save the results to a file.
-- Allows limiting the depth of crawling (e.g., only scan links within a certain number of levels from the starting URL).
+- Check Port and Service Running on it.
+- Check TLS Certificate also.
 
 ## Usage
 
