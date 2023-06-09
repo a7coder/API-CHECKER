@@ -157,10 +157,10 @@ def get_all_links(url):
 
             if  absolute_url not in all_links:
 
-                if url not in parent_dict:
-                    parent_dict[url] = set()
+                if absolute_url not in parent_dict:
+                    parent_dict[absolute_url] = set()
 
-                parent_dict[url].add(absolute_url)
+                parent_dict[absolute_url].add(url)
 
                 all_links.add(absolute_url)
                 queue_links.append(absolute_url)
@@ -186,10 +186,10 @@ def get_all_links(url):
 
                 if  get_domain(absolute_url)== actual_domain and absolute_url not in all_links:
 
-                    if url not in parent_dict:
-                        parent_dict[url] = set()
+                    if absolute_url not in parent_dict:
+                        parent_dict[absolute_url] = set()
 
-                    parent_dict[url].add(absolute_url)
+                    parent_dict[absolute_url].add(url)
                     all_links.add(absolute_url)
                     queue_links.append(absolute_url)
         
@@ -232,7 +232,6 @@ def scan_website(url):
                 else:
                     broken_links.append(link)
 
-        
         return all_links, valid_links, broken_links
     
     except:
