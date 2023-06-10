@@ -6,9 +6,7 @@ import concurrent
 import csv
 import socket
 import ssl
-
 from collections import deque
-
 
 def get_domain(url):
     Domain_name = ''
@@ -53,7 +51,7 @@ def check_open_ports(url: str):
     with ThreadPoolExecutor(max_workers=50) as executor:
         
         tasks = [executor.submit(check_port, port, url)
-                 for port in range(1, 65535)]
+                 for port in range(1, 500)]
 
       
         for future in concurrent.futures.as_completed(tasks):
@@ -126,65 +124,40 @@ def check_security_headers(url):
 
 parent_dict = {}
 def get_all_links(url):
-    
+   
     print("********************* Getting All The Links From the Site *********************")
     print()
 
     actual_domain=get_domain(url)
     all_links = set()
     queue_links=deque([])
+    visited=set()
 
-    queue_links.append(url)
     all_links.add(url)
+    queue_links.append(url)
 
     headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'}
-    response = requests.get(url, headers=headers)
-
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    for anchor in soup.find_all('a'):
-
-        href = anchor.get('href')
-
-        if href and not (href.startswith("mailto:") or href.startswith("javascript:") or href.startswith('tel') or href.startswith('#')):
-
-            absolute_url = href
-
-            if not (absolute_url.startswith("http") or absolute_url.startswith("https")) :
-
-                absolute_url =urljoin(url, href)
-                    
-
-            if  absolute_url not in all_links:
-
-                if absolute_url not in parent_dict:
-                    parent_dict[absolute_url] = set()
-
-                parent_dict[absolute_url].add(url)
-
-                all_links.add(absolute_url)
-                queue_links.append(absolute_url)
-
+    
     while queue_links:
 
         url= queue_links.popleft()
-        response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        if url not in visited and get_domain(url) == actual_domain:
+            
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.text, 'html.parser')
 
-        for anchor in soup.find_all('a'):
+            for anchor in soup.find_all('a'):
 
-            href = anchor.get('href')
+                href = anchor.get('href')
 
-            if href and not (href.startswith("mailto:") or href.startswith("javascript:") or href.startswith('tel') or href.startswith('#')):
+                if href and not (href.startswith("mailto:") or href.startswith("javascript:") or href.startswith('tel') or href.startswith('#')):
 
-                absolute_url = href
+                    absolute_url = href
 
-                if not (absolute_url.startswith("http") or absolute_url.startswith("https")) :
+                    if not (absolute_url.startswith("http") or absolute_url.startswith("https")) :
 
-                    absolute_url =urljoin(url, href)
-                    
-
-                if  get_domain(absolute_url)== actual_domain and absolute_url not in all_links:
+                        absolute_url =urljoin(url, href)                 
 
                     if absolute_url not in parent_dict:
                         parent_dict[absolute_url] = set()
@@ -192,7 +165,8 @@ def get_all_links(url):
                     parent_dict[absolute_url].add(url)
                     all_links.add(absolute_url)
                     queue_links.append(absolute_url)
-        
+
+        visited.add(url)
 
     print("********************** All Links Are Fetched **********************")
     print(all_links)
